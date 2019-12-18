@@ -2,7 +2,9 @@
 name = "lasm"
 version = "0.1.0"
 authors = ["adam-mcdaniel <adam.mcdaniel17@gmail.com>"]
+description = "A tiny and portable assembly language for complex compilers"
 edition = "2018"
+license = "Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
