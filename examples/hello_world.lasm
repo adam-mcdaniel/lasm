@@ -1,0 +1,33 @@
+proc start
+
+    push 0
+    push '!'
+    push 'd'
+    push 'l'
+    push 'r'
+    push 'o'
+    push 'w'
+    push ' '
+    push 'o'
+    push 'l'
+    push 'l'
+    push 'e'
+    push 'H'
+
+    call print
+    call nl
+endproc
+
+proc nl
+    push '\n' outc
+endproc
+
+
+proc print
+    dup
+    loop
+        outc
+        dup
+    endloop
+    pop
+endproc

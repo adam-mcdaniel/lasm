@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `lasm` crate."><meta name="keywords" content="rust, rustlang, rust-lang, lasm"><title>lasm - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../lasm/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate lasm</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all lasm's items</p></a><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#functions">Functions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'lasm', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/lasm/lib.rs.html#1-251' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>lasm</a></span></h1><div class='docblock'><h1 id="lasm-a-minimal-and-portable-assembly-langauge" class="section-header"><a href="#lasm-a-minimal-and-portable-assembly-langauge">lasm, a minimal and portable assembly langauge</a></h1>
+<p>The spirit of this crate is to make the most small and correct
+assembly language as possible. A reduced instruction set is valued
+above all else. If possible, speed is also an admirable trait.</p>
+<h1 id="purpose" class="section-header"><a href="#purpose">purpose</a></h1>
+<p>Writing a compiler is very <strong><em>very</em></strong> hard. A lot of that
+difficulty comes from trying to manage memory and trying to represent
+high level concepts in terms of low level instructions.</p>
+<p>So, with these problems in mind, I wrote this assembly language.</p>
+<h1 id="features" class="section-header"><a href="#features">features</a></h1>
+<p>The most high level feature is the infinite number of registers. This allows
+the compiler to declare and use variables <strong>significantly</strong> easier.
+The last time I wrote a compiler, the absolute hardest part was managing
+when variables were allocated and freed. As a result, I wrote this assembly
+language to take care of that!</p>
+<h3 id="procedures" class="section-header"><a href="#procedures">procedures</a></h3>
+<p>Another high level feature is managing procedure declarations. When the
+assembly is parsed, the procedures are each defined before they are checked
+for semantic errors. So, procedures can be defined in any order.</p>
+<h3 id="portability" class="section-header"><a href="#portability">portability</a></h3>
+<p>The final, and best feature is portability. lasm is <em>extremely</em> compact:
+the entire C implementation of lasm's instruction set is nearly 150 lines.
+Writing an implementation for lasm is extremely simple, and so compiling to
+lasm allows the compiler to target several different programming languages
+and platforms.</p>
+<h1 id="basic-instructions" class="section-header"><a href="#basic-instructions">basic instructions</a></h1><table><thead><tr><th>Stack Instruction</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>push LITERAL</code></td><td>Push the LITERAL argument onto the stack. The LITERAL argument MUST be a character or float</td></tr>
+<tr><td><code>pop</code></td><td>Pop a value off of the stack and into the ACC register</td></tr>
+<tr><td><code>ld REGISTER</code></td><td>Push the value stored in REGISTER onto the stack. The REGISTER being loaded MUST be defined before being loaded</td></tr>
+<tr><td><code>st REGISTER</code></td><td>Pop a value off of the stack into REGISTER. The REGISTER being stored to MUST be declared before being stored</td></tr>
+<tr><td><code>dup</code></td><td>Duplicate the top item on the stack</td></tr>
+</tbody></table>
+<table><thead><tr><th>Pointer Instruction</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>refer REGISTER</code></td><td>Push a pointer to REGISTER onto the stack</td></tr>
+<tr><td><code>deref_ld</code></td><td>Pop a pointer off of the stack, and push the value stored at where the pointer points. This will only push a single cell onto the stack, not more than one cell</td></tr>
+<tr><td><code>deref_st</code></td><td>Pop a pointer and a cell off of the stack, and store the cell at the pointer</td></tr>
+<tr><td><code>alloc REGISTER</code></td><td>Pop a SIZE value off of the stack, and store the address to SIZE free cells in REGISTER</td></tr>
+<tr><td><code>free REGISTER</code></td><td>Pop a SIZE value off of the stack, and free the memory stored at the pointer stored in REGISTER</td></tr>
+</tbody></table>
+<table><thead><tr><th>Math Instruction</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>add</code></td><td>Pop two cells off of the stack, and push their sum</td></tr>
+<tr><td><code>sub</code></td><td>Pop two cells off of the stack, and push the first minus the second</td></tr>
+<tr><td><code>div</code></td><td>Pop two cells off of the stack, and push their product</td></tr>
+<tr><td><code>mul</code></td><td>Pop two cells off of the stack, and push the first divided by the second</td></tr>
+<tr><td><code>cmp</code></td><td>Pop two cells off of the stack, and push -1 if the first is less than the second, 0 if they are equal, and 1 otherwise</td></tr>
+</tbody></table>
+<table><thead><tr><th>IO Instruction</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>outc</code></td><td>Pop a cell off of the stack and print it as a character</td></tr>
+<tr><td><code>outn</code></td><td>Pop a cell off of the stack and print it as a float</td></tr>
+<tr><td><code>inc</code></td><td>Get a character from STDIN and push it into the stack</td></tr>
+<tr><td><code>inn</code></td><td>Get a float from STDIN and push it into the stack</td></tr>
+</tbody></table>
+<table><thead><tr><th>Control Instruction</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>loop</code></td><td>Marks the start of a loop. At the start of each iteration, a test value is popped from the stack. While the value is not zero, the loop continues. Else, the loop jumps to the matching <code>endloop</code></td></tr>
+<tr><td><code>endloop</code></td><td>Marks the end of a loop</td></tr>
+</tbody></table>
+<h1 id="examples" class="section-header"><a href="#examples">examples</a></h1>
+<p>This assembly language is a bit simpler than most others because
+portability and compactness are the two largest goals in mind.
+As a result, examples are pretty simple.</p>
+<h2 id="fibonacci" class="section-header"><a href="#fibonacci">fibonacci</a></h2>
+<p>This simply implements fibonacci by doing arithmetic on three variables <code>a</code>, <code>b</code>, and <code>c</code>.
+To simplify outputing the numbers, a few helper procedures are defined.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ<span class='tooltiptext'>This example is not tested</span></div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="comment">// comments are C-style</span>
+<span class="comment">// The `stack_size` flag can ONLY be used at the top of the file.</span>
+<span class="comment">// Anywhere else, this flag will show up as a syntax error.</span>
+<span class="comment">// The purpose of the flag is to set the size of memory used</span>
+<span class="comment">// outside of the statically determined memory. Any loads,</span>
+<span class="comment">// pushes, allocs, etc. require a bit of memory on the stack.</span>
+
+<span class="comment">// If this flag is not present, 256 cells are used by default.</span>
+<span class="ident">stack_size</span> <span class="number">1024</span>
+
+<span class="comment">// The start procedure is the entry point</span>
+<span class="ident">proc</span> <span class="ident">start</span>
+    <span class="comment">// Declare the registers we will use</span>
+    <span class="ident">define</span> <span class="ident">a</span>, <span class="number">1</span>
+    <span class="comment">// Push 0 and store it in &#39;a&#39;</span>
+    <span class="ident">push</span> <span class="number">0</span> <span class="ident">st</span> <span class="ident">a</span>
+    <span class="ident">define</span> <span class="ident">b</span>, <span class="number">1</span>
+    <span class="comment">// Push 1 and store it in &#39;b&#39;</span>
+    <span class="ident">push</span> <span class="number">1</span> <span class="ident">st</span> <span class="ident">b</span>
+    <span class="ident">define</span> <span class="ident">c</span>, <span class="number">1</span>
+    <span class="comment">// Push 0 and store it in &#39;c&#39;</span>
+    <span class="ident">push</span> <span class="number">0</span> <span class="ident">st</span> <span class="ident">c</span>
+
+    <span class="comment">// This will determine the number of times to iterate</span>
+    <span class="ident">define</span> <span class="ident">n</span>, <span class="number">1</span>
+    <span class="comment">// Push 10 and store it in &#39;n&#39;</span>
+    <span class="ident">push</span> <span class="number">10</span> <span class="ident">st</span> <span class="ident">n</span>
+
+    <span class="comment">// loop while n is not zero</span>
+    <span class="ident">ld</span> <span class="ident">n</span>
+    <span class="kw">loop</span>
+        <span class="ident">ld</span> <span class="ident">a</span> <span class="ident">st</span> <span class="ident">c</span> <span class="comment">// c = a</span>
+        <span class="ident">ld</span> <span class="ident">b</span> <span class="ident">st</span> <span class="ident">a</span> <span class="comment">// a = b</span>
+        <span class="ident">ld</span> <span class="ident">a</span> <span class="ident">call</span> <span class="ident">print_num</span> <span class="comment">// print a</span>
+        <span class="ident">ld</span> <span class="ident">c</span> <span class="ident">ld</span> <span class="ident">b</span> <span class="ident">add</span> <span class="ident">st</span> <span class="ident">b</span> <span class="comment">// b = c + b</span>
+
+        <span class="ident">push</span> <span class="number">1</span>
+        <span class="ident">ld</span> <span class="ident">n</span>
+        <span class="comment">// subtract 1 from n</span>
+        <span class="ident">sub</span>
+        <span class="comment">// store the result in n again</span>
+        <span class="ident">st</span> <span class="ident">n</span>
+
+        <span class="comment">// Load n again for the loop test</span>
+        <span class="ident">ld</span> <span class="ident">n</span>
+    <span class="ident">endloop</span>
+<span class="ident">endproc</span>
+
+
+<span class="ident">proc</span> <span class="ident">print_num</span>
+    <span class="comment">// the define keyword takes two arguments,</span>
+    <span class="comment">// the name of the register and the size of</span>
+    <span class="comment">// the newly created register.</span>
+
+    <span class="comment">// This simply tells the assembler to allocate permanent</span>
+    <span class="comment">// space for a register with a given size. It also tells</span>
+    <span class="comment">// the assembler how many cells to pop off of the stack when</span>
+    <span class="comment">// storing a value in this register.</span>
+    <span class="ident">define</span> <span class="ident">n</span>, <span class="number">1</span>
+     
+    <span class="comment">// When we call print_num, we expect a single argument on the</span>
+    <span class="comment">// stack. So, we store this argument in the register n for later</span>
+    <span class="comment">// usage.</span>
+    <span class="ident">st</span> <span class="ident">n</span>
+
+    <span class="comment">// Now we load the value stored in n back onto the stack</span>
+    <span class="comment">// and print the value as a number</span>
+    <span class="ident">ld</span> <span class="ident">n</span> <span class="ident">outn</span>
+
+    <span class="comment">// Now we print a newline using the newline procedure</span>
+    <span class="ident">call</span> <span class="ident">nl</span>
+<span class="ident">endproc</span>
+
+
+<span class="ident">proc</span> <span class="ident">nl</span>
+    <span class="comment">// 10 (the character code for &#39;\n&#39;) is pushed onto the stack</span>
+    <span class="comment">// and printed out as a character</span>
+    <span class="ident">push</span> <span class="number">10</span> <span class="ident">outc</span>
+<span class="ident">endproc</span></pre></div>
+<h1 id="implementation" class="section-header"><a href="#implementation">implementation</a></h1>
+<p>lasm's implementation is very simple: there are very few instructions to implement
+when targeting a new programming language. Additionally, lasm's structure is very
+simple to implement in low level languages.</p>
+<p>There are a few <strong>very</strong> important notes for lasm's implementation</p>
+<ol>
+<li>lasm's memory is implemented using an array of double precision floats, or 64 bit floats</li>
+<li>lasm tracks allocs and frees for each individual cell of the memory array. This is most
+simply done using an array of booleans with identical length to the data tape</li>
+<li>allocating more than the available amount of memory is undefined behavior (if possible, this should cause the program to exit)</li>
+<li>the implementation should <em>always</em> mark memory reserved for registers as allocated (so that alloc may not return a pointer to register memory)</li>
+<li>memory reserved for registers always lies <strong>immediately</strong> before the stack</li>
+<li>the accumulator register always lies at address <code>0</code></li>
+<li>the stack pointer register always lies at address <code>1</code></li>
+<li>user defined registers lie between the stack pointer register and the stack</li>
+<li>the <code>inn</code> and <code>inc</code> instructions return <code>0</code> on <code>EOF</code> and on other input errors</li>
+</ol>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Re-exports</a></h2>
+<table><tr><td><code>pub use asm::<a class="enum" href="../lasm/asm/enum.Instruct.html" title="enum lasm::asm::Instruct">Instruct</a>;</code></td></tr><tr><td><code>pub use asm::<a class="enum" href="../lasm/asm/enum.Register.html" title="enum lasm::asm::Register">Register</a>;</code></td></tr><tr><td><code>pub use target::<a class="trait" href="../lasm/target/trait.Target.html" title="trait lasm::target::Target">Target</a>;</code></td></tr><tr><td><code>pub use error::<a class="enum" href="../lasm/error/enum.Error.html" title="enum lasm::error::Error">Error</a>;</code></td></tr><tr><td><code>pub use error::<a class="type" href="../lasm/error/type.Result.html" title="type lasm::error::Result">Result</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr class='module-item'><td><a class="mod" href="asm/index.html" title='lasm::asm mod'>asm</a></td><td class='docblock-short'><p>asm, the module that provides structures that represent assembly instructions</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="error/index.html" title='lasm::error mod'>error</a></td><td class='docblock-short'><p>error, the module that provides basic structures for error handling</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="target/index.html" title='lasm::target mod'>target</a></td><td class='docblock-short'><p>target, the module responsible for providing common targets for lasm</p>
+</td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table><tr class='module-item'><td><a class="fn" href="fn.assemble.html" title='lasm::assemble fn'>assemble</a></td><td class='docblock-short'><p>assemble takes an assembly target, and the assembly code an object that implements display</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "lasm";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

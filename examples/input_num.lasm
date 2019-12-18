@@ -1,0 +1,8 @@
+proc start
+    push '>' outc
+    push '\t' outc
+    inn
+    push 1
+    add
+    outn
+endproc

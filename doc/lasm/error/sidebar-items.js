@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","The Error type is used when assembling and parsing an assembly file  "]],"type":[["Result","The Result type is shorthand for a result that uses the Error enum as the Err type. The Error type is just used as the general crate-wide Error type."]]});

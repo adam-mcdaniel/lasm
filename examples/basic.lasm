@@ -1,0 +1,201 @@
+
+stack_size 128
+
+proc start
+
+    define in_ptr, 1
+    define str_size, 1
+    push 32 st str_size
+    ld str_size alloc in_ptr
+
+
+    push '>' outc push ' ' outc
+    ld in_ptr call cscan
+
+    push 0
+    push '"'
+    push ' '
+    push 'd'
+    push 'i'
+    push 'a'
+    push 's'
+    push ' '
+    push 'u'
+    push 'o'
+    push 'y'
+    call print
+    ld in_ptr call cprint
+    push '"' outc
+    call nl
+
+    ld str_size free in_ptr
+
+endproc
+
+proc nl
+    push 10 outc
+endproc
+
+proc last
+    call last_ptr
+    deref_ld
+endproc
+
+proc last_ptr
+    define ip, 1
+    ld SPR
+    st ip
+
+    push 1
+    ld ip
+    sub
+endproc
+
+
+proc cprint
+    define ptr, 1
+    st ptr
+
+    ld ptr
+    deref_ld
+    dup
+    loop
+        outc
+        ld ptr
+        push 1
+        add
+        st ptr
+
+        ld ptr
+        deref_ld
+        dup
+    endloop
+    pop
+endproc
+
+
+proc cscan
+    define ptr, 1
+    define CH, 1
+    st ptr
+
+    inc st CH
+    ld CH push 10 call nequal
+    ld CH push 0 call nequal
+    call and
+    loop
+        ld CH
+        ld ptr
+        deref_st
+
+        ld ptr push 1 add st ptr
+        
+        inc st CH
+        ld CH push 10 call nequal
+        ld CH push 0 call nequal
+        call and
+    endloop
+endproc
+
+
+proc print
+    dup
+    loop
+        outc
+        dup
+    endloop
+    pop
+endproc
+
+proc greater_eq
+    define a, 1
+    define b, 1
+    st a st b
+    ld a ld b
+    cmp push 1 add
+    call bool
+endproc
+
+proc less_eq
+    define a, 1
+    define b, 1
+    define r, 1
+    st a st b
+    ld a ld b
+    cmp
+    st r
+
+    push 1
+    ld r
+    sub
+    call bool
+endproc
+
+proc greater
+    define a, 1
+    define b, 1
+    st a st b
+    
+    ld a ld b call greater_eq
+    ld a ld b call nequal
+    mul
+    call bool
+endproc
+
+proc less
+    define a, 1
+    define b, 1
+    st a st b
+
+    ld a ld b call less_eq
+    ld a ld b call nequal
+    mul
+    call bool
+endproc
+
+proc equal
+    sub call not
+endproc
+
+proc nequal
+    call equal call not
+endproc
+
+
+proc and
+    call bool
+    call bool
+    mul
+endproc
+
+proc or
+    call bool
+    call bool
+    add
+    call bool
+endproc
+
+
+proc not
+    define in, 1
+    st in
+    push 1
+    ld in
+    loop
+        pop
+        push 0
+        push 0
+    endloop
+endproc
+
+proc bool
+    define in, 1
+    st in
+    push 0
+    ld in
+    loop
+        pop
+        push 1
+        push 0
+    endloop
+endproc
