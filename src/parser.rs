@@ -85,6 +85,8 @@ fn register(input: &str) -> ParseResult<Register> {
         cut(map_opt(identifier, |name| match name {
             "ACC" => Some(Register::Accumulator),
             "SPR" => Some(Register::StackPointer),
+            "FSRC" => Some(Register::FileSource),
+            "FDST" => Some(Register::FileDestination),
             other => Register::named(other),
         })),
     )(input)
@@ -108,6 +110,7 @@ fn opcode(input: &str) -> ParseResult<&str> {
         // a second alt must be added because the number of arguments
         // is too large for a single call to alt
         alt((
+            tag("upio"),
             tag("inc"),
             tag("inn"),
             tag("sub"),
@@ -155,6 +158,7 @@ fn instruction(input: &str) -> ParseResult<Exec> {
             let (input, lit) = context(Error::INVALID_PUSH_ARG, cut(literal))(input)?;
             Ok((input, Exec::asm(Instruct::Push(lit))))
         }
+        "upio" => Ok((input, Exec::asm(Instruct::UpdateIO))),
         "pop" => Ok((input, Exec::asm(Instruct::Pop))),
         "dup" => Ok((input, Exec::asm(Instruct::Duplicate))),
         "add" => Ok((input, Exec::asm(Instruct::Add))),
