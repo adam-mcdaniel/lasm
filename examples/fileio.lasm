@@ -1,76 +1,46 @@
+stack_size 4096
 
-stack_size 128
+
 
 proc start
 
-    define in_ptr, 1
-    define str_size, 1
-    push 32 st str_size
-    ld str_size alloc in_ptr
+    define fname, 6
+    push 0
+    push 't'
+    push 'x'
+    push 't'
+    push '.'
+    push 'a'
+    st fname
 
+    define input, 256
 
-    push '>' outc push ' ' outc
-    ld in_ptr call cscan
+    refer fname call read
+
+    refer input call cscan
+
+    call resetout
+
+    refer fname call cprint
 
     push 0
     push '"'
     push ' '
-    push 'd'
-    push 'i'
+    push 's'
+    push 'y'
     push 'a'
     push 's'
     push ' '
-    push 'u'
-    push 'o'
-    push 'y'
     call print
-    ld in_ptr call cprint
-    push '"' outc
-    call nl
 
-    ld str_size free in_ptr
+    refer input call cprint
+
+
+    push 0
+    push '"'
+    call print
 endproc
 
-proc nl
-    push 10 outc
-endproc
-
-proc last
-    call last_ptr
-    deref_ld
-endproc
-
-proc last_ptr
-    define ip, 1
-    ld SPR
-    st ip
-
-    push 1
-    ld ip
-    sub
-endproc
-
-
-proc cprint
-    define ptr, 1
-    st ptr
-
-    ld ptr
-    deref_ld
-    dup
-    loop
-        outc
-        ld ptr
-        push 1
-        add
-        st ptr
-
-        ld ptr
-        deref_ld
-        dup
-    endloop
-    pop
-endproc
 
 
 proc cscan
@@ -96,6 +66,21 @@ proc cscan
     endloop
 endproc
 
+proc read
+    define fname, 1
+    st fname
+    ld fname st FSRC
+    upio
+endproc
+
+proc resetout
+    push 0 st FDST
+    upio
+endproc
+
+proc nl
+    push '\n' outc
+endproc
 
 proc print
     dup
@@ -105,6 +90,35 @@ proc print
     endloop
     pop
 endproc
+
+proc cprintln
+    call cprint
+    call nl
+endproc
+
+proc cprint
+    define ptr, 1
+    st ptr
+
+    ld ptr
+    deref_ld
+    dup
+    loop
+        outc
+        ld ptr
+        push 1
+        add
+        st ptr
+
+        ld ptr
+        deref_ld
+        dup
+    endloop
+    pop
+endproc
+
+
+
 
 proc greater_eq
     define a, 1

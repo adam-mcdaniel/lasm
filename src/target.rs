@@ -44,16 +44,80 @@ const int MEMORY_SIZE = {mem_size};",
         );
 
         result += r#"
-const int ACC = 0;
-const int SPR = 1;
+const int ACC  = 0;
+const int SPR  = 1;
+const int FSRC = 2;
+const int FDST = 3;
+
+FILE *OUTPUT;
+FILE *INPUT;
+
+
+
+void str_at(double tape[], int addr, char *name) {
+    for (int i=0; tape[addr + i]; i++) {
+        char ch = (int)tape[addr + i] % 256;
+        name[i] = ch;
+    }
+}
+
+
+void update_io(double tape[]) {
+    int fsrc_start = tape[FSRC];
+    int fdst_start = tape[FDST];
+
+    if (fsrc_start == 0) {
+        INPUT = stdin;
+    } else {
+        char filename[FILENAME_MAX];
+        str_at(tape, fsrc_start, filename);
+        INPUT = fopen(filename, "r");
+    }
+
+
+    if (fdst_start == 0) {
+        OUTPUT = stdout;
+    } else {
+        char filename[FILENAME_MAX];
+        str_at(tape, fdst_start, filename);
+        OUTPUT = fopen(filename, "w+");
+    }
+}
 
 
 void init(double tape[], bool alloc_tape[]) {
+    tape[ACC] = 0;
     tape[SPR] = INIT_STACK_PTR;
+    tape[FSRC] = 0;
+    tape[FDST] = 0;
+
+    INPUT = stdin;
+    OUTPUT = stdout;
+    
+    update_io(tape);
+
     for (int i=0; i<INIT_STACK_PTR; i++) {
         alloc_tape[i] = true;
     }
 }
+
+
+void frm(double tape[]) {
+    char filename[FILENAME_MAX];
+    str_at(tape, tape[FDST], filename);
+    remove(filename);
+}
+
+void fmv(double tape[]) {
+    char src[FILENAME_MAX];
+    char dst[FILENAME_MAX];
+
+    str_at(tape, tape[FSRC], src);
+    str_at(tape, tape[FDST], dst);
+
+    rename(src, dst);
+}
+
 
 void push_cell(double tape[], double value) {
     tape[(int)tape[SPR]++] = value;
@@ -80,13 +144,13 @@ void deref_store(double tape[]) {
 
 void store(double tape[], int addr, int size) {
     for (int i=0; i<size; i++) {
-        pop_cell(tape, addr + size - i - 1);
+        pop_cell(tape, addr + i);
     }
 }
 
 void load(double tape[], int addr, int size) {
     for (int i=0; i<size; i++) {
-        push_cell(tape, tape[(int)(addr + i)]);
+        push_cell(tape, tape[(int)(addr + size - i - 1)]);
     }
 }
 
@@ -146,17 +210,17 @@ void cmp(double tape[]) {
 
 void outc(double tape[]) {
     pop_cell(tape, ACC);
-    printf("%c", (int)(tape[ACC]) % 256);
+    fprintf(OUTPUT, "%c", (int)(tape[ACC]) % 256);
 }
 
 void outn(double tape[]) {
     pop_cell(tape, ACC);
-    printf("%lG", tape[ACC]);
+    fprintf(OUTPUT, "%lG", tape[ACC]);
 }
 
 void inc(double tape[]) {
     char ch;
-    if (scanf("%c", &ch) == 1) {
+    if (fscanf(INPUT, "%c", &ch) == 1) {
         push_cell(tape, ch);
     } else {
         push_cell(tape, 0);
@@ -165,7 +229,7 @@ void inc(double tape[]) {
 
 void inn(double tape[]) {
     double d;
-    if (scanf("%lG", &d) == 1) {
+    if (fscanf(INPUT, "%lG", &d) == 1) {
         push_cell(tape, d);
     } else {
         push_cell(tape, 0);
@@ -237,6 +301,7 @@ int main() {
                         format!("store(tape, {}, {});", r.get_addr(), r.get_size())
                     }
                     Instruct::Push(l) => format!("push_cell(tape, {});", l.get()),
+                    Instruct::UpdateIO => String::from("update_io(tape);"),
                     Instruct::Pop => String::from("pop_cell(tape, ACC);"),
                     Instruct::Duplicate => String::from("dup(tape);"),
                     Instruct::Add => String::from("add(tape);"),

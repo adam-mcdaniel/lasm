@@ -15,7 +15,7 @@ pub const DEFAULT_STACK_SIZE: usize = 256;
 /// This is VERY important to get right, if this is too small,
 /// user defined registers will overwrite the Accumulator,
 /// StackPointer, and other predefined registers.
-pub const PREDEFINED_REGISTERS: usize = 2;
+pub const PREDEFINED_REGISTERS: usize = 4;
 
 lazy_static! {
     /// This tracks the current address where the next register will be allocated
@@ -34,6 +34,12 @@ pub enum Register {
 
     /// The register that stores temporary values in several instructions
     Accumulator,
+
+    /// The register that stores the current input file
+    FileSource,
+
+    /// The register that stores the current output file
+    FileDestination,
 
     /// A register defined by the user. Each register's address and size is
     /// known statically.
@@ -92,7 +98,9 @@ impl Register {
         match self {
             Self::Named { addr, .. } => *addr,
             Self::Accumulator => 0,
-            Self::StackPointer => 1
+            Self::StackPointer => 1,
+            Self::FileSource => 2,
+            Self::FileDestination => 3,
         }
     }
 
@@ -196,6 +204,17 @@ pub enum Instruct {
     /// off of the stack. Then, `free` frees `size` number of values at the location the
     /// register points to.
     Free(Register),
+
+    /// The `upio` instruction takes no arguments, and simply updates the input and output streams
+    /// used by the other input and output instructions. This is used for doing file input and output.
+    /// 
+    /// To read from or write to a file, store addresses to strings containing file paths in
+    /// the FSRC and FDST registers and call this instruction. The file path stored in FSRC will
+    /// be used to retrieve input, and the file path stored in FDST will be used to output.
+    /// 
+    /// To use standard input again, store zero in FSRC.
+    /// To use standard output again, store zero in FDST.
+    UpdateIO,
 
     /// The `dup` instruction takes no argument, and simply duplicates the top item on
     /// the stack.
